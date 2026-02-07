@@ -25,9 +25,14 @@ services:
       - PLAYWRIGHT_LAUNCH_OPTIONS={"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]}
 
     volumes:
-      # Persistent workspace for projects
+      # Persistent workspace for projects (Host Bind Mount)
       - ./data:/home/sandbox/.openclaw/workspace:rw
       
+      # Persistence for OpenClaw Skills/Plugins (Named Volume)
+      # Using a named volume preserves pre-installed plugins from the image
+      # while allowing new runtime installations.
+      - openclaw_extensions:/home/sandbox/.openclaw/extensions:rw
+
       # Persistence for browser sessions (WhatsApp, Telegram, Discord logins)
       - ./data/.config:/home/sandbox/.config:rw
       - ./data/.cache:/home/sandbox/.cache:rw
@@ -66,3 +71,6 @@ services:
 
     group_add:
       - "1000"
+
+volumes:
+  openclaw_extensions:
