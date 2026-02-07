@@ -16,6 +16,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/kerwinluk2/openclaw-ubuntu-s
 irm https://raw.githubusercontent.com/kerwinluk2/openclaw-ubuntu-sandbox/main/install.ps1 | iex
 ```
 
+*Note: Since this is a private repository, you may need to clone it first and run `install.ps1` locally if the command above fails.*
+
 This will:
 1.  Clone (or update) this repository.
 2.  Build the hardened Docker image.
@@ -27,11 +29,14 @@ This will:
 
 -   **Full Desktop Environment**: XFCE desktop accessible via web browser (noVNC) at `http://localhost:8080`.
 -   **AI Automation Ready**: Pre-installed with **OpenClaw (v2026.2.3)**, **OpenCode AI**, and **Playwright**.
+-   **AI Client Gateway**: Pre-installed **AIClient-2-API** accessible at `http://localhost:3000`.
+-   **Laravel Ready**: Includes Composer, PHP (with bcmath, mysql, sqlite3 extensions), and Node.js 22.
 -   **Browser Automation**: Optimized for Chromium automation (WhatsApp, Telegram, Discord, etc.) with shared memory tweaks and session persistence.
 -   **Secure by Design**:
     -   **Non-root**: Runs entirely as user `sandbox` (UID 1000).
     -   **Read-Only Root**: The container's root filesystem is read-only.
     -   **Least Privilege**: All Linux capabilities dropped (`cap_drop: [ALL]`).
+    -   **Localhost Only**: Services are bound to `127.0.0.1` by default, preventing external network access.
     -   **Isolation**: `no-new-privileges` enabled to prevent escalation.
 -   **Persistent Workspace**: Keeps your projects, browser sessions (`.config`), SSH keys, and npm packages between restarts.
 
@@ -58,9 +63,12 @@ docker compose up -d
 
 ## 🔌 Access & Ports
 
+Services are bound to **127.0.0.1** for security. You cannot access them from other devices on your network unless you modify `docker-compose.yml`.
+
 | Port | Service | URL | Description |
 | :--- | :--- | :--- | :--- |
 | **8080** | noVNC | `http://localhost:8080` | Web-based Desktop Access |
+| **3000** | AIClient | `http://localhost:3000` | AI Client Gateway / UI |
 | **18789** | OpenClaw API | `http://localhost:18789` | Main Automation Gateway |
 | **18790** | OpenClaw WS | `http://localhost:18790` | WebSocket / Dashboard |
 
