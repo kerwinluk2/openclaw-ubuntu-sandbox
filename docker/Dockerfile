@@ -50,6 +50,13 @@ RUN npm install -g npm@latest
 # Install OpenClaw and OpenCode AI globally
 RUN npm install -g openclaw@2026.2.3 opencode-ai@latest
 
+# Install AIClient-2-API
+WORKDIR /opt
+RUN git clone https://github.com/justlovemaki/AIClient-2-API.git aiclient \
+    && cd aiclient \
+    && npm install \
+    && chown -R sandbox:sandbox /opt/aiclient
+
 # Install Playwright and Chromium for browser automation
 RUN npm install -g playwright && npx playwright install chromium
 
@@ -75,8 +82,8 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Expose ports: 8080 (noVNC), 18789/18790 (OpenClaw)
-EXPOSE 8080 18789 18790
+# Expose ports: 8080 (noVNC), 18789/18790 (OpenClaw), 3000 (AIClient)
+EXPOSE 8080 18789 18790 3000
 
 # Switch to non-root user for runtime
 USER sandbox

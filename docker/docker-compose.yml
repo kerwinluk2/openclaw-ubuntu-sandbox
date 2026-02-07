@@ -14,6 +14,7 @@ services:
       - "8080:8080"   # noVNC web UI
       - "18789:18789" # OpenClaw API
       - "18790:18790" # OpenClaw WebSocket/Gateway
+      - "3000:3000"   # AIClient-2-API UI/API
 
     environment:
       - TZ=Etc/UTC
@@ -29,9 +30,10 @@ services:
       - ./data:/home/sandbox/.openclaw/workspace:rw
       
       # Persistence for OpenClaw Skills/Plugins (Named Volume)
-      # Using a named volume preserves pre-installed plugins from the image
-      # while allowing new runtime installations.
       - openclaw_extensions:/home/sandbox/.openclaw/extensions:rw
+
+      # Persistence for AIClient-2-API configs (Named Volume)
+      - aiclient_configs:/opt/aiclient/configs:rw
 
       # Persistence for browser sessions (WhatsApp, Telegram, Discord logins)
       - ./data/.config:/home/sandbox/.config:rw
@@ -74,3 +76,4 @@ services:
 
 volumes:
   openclaw_extensions:
+  aiclient_configs:
