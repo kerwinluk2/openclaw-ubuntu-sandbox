@@ -1,16 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-# Ensure proper ownership of OpenClaw workspace
+# Helper to fix permissions on mounted volumes if they differ from sandbox user
+fix_perms() {
+    local dir="$1"
+    # Only try to chown if directory exists
+    if [ -d "$dir" ]; then
+        sudo chown -R sandbox:sandbox "$dir" || true
+    fi
+}
+
+# Fix ownership of persistent data directories
+# This ensures that even if docker creates them as root on the host, 
+# the sandbox user can write to them.
 if id sandbox >/dev/null 2>&1; then
-  sudo chown -R sandbox:sandbox /home/sandbox/.openclaw || true
-  sudo chown -R sandbox:sandbox /home/sandbox/.npm || true
+    fix_perms "/home/sandbox/.openclaw/workspace"
+    fix_perms "/home/sandbox/.npm"
+    fix_perms "/home/sandbox/.config"
+    fix_perms "/home/sandbox/.cache"
+    fix_perms "/home/sandbox/.ssh"
 fi
 
-# Set up OpenClaw config directory if it doesn't exist
-mkdir -p /home/sandbox/.openclaw/workspace
-
-# Ensure Playwright browsers are accessible
+# Set up Playwright
 export PLAYWRIGHT_BROWSERS_PATH=0
 
 # Execute the main process (supervisord by default)

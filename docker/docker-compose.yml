@@ -12,49 +12,57 @@ services:
 
     ports:
       - "8080:8080"   # noVNC web UI
-      - "18789:18789" # OpenClaw API/WebSocket
-      - "18790:18790" # OpenClaw additional port
+      - "18789:18789" # OpenClaw API
+      - "18790:18790" # OpenClaw WebSocket/Gateway
 
     environment:
       - TZ=Etc/UTC
       - HOME=/home/sandbox
       - OPENCLAW_HOME=/home/sandbox/.openclaw
-      # Chromium path for Playwright
+      # Point Playwright to the installed system Chromium
       - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      # Critical for running Chromium in a container without SYS_ADMIN cap
+      - PLAYWRIGHT_LAUNCH_OPTIONS={"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]}
 
     volumes:
-      # Persistent workspace for OpenClaw data and projects
+      # Persistent workspace for projects
       - ./data:/home/sandbox/.openclaw/workspace:rw
-      # Git config persistence
+      
+      # Persistence for browser sessions (WhatsApp, Telegram, Discord logins)
+      - ./data/.config:/home/sandbox/.config:rw
+      - ./data/.cache:/home/sandbox/.cache:rw
+      
+      # Persistence for development tools & identity
       - ./data/.gitconfig:/home/sandbox/.gitconfig:rw
-      # Node/npm cache (optional, speeds up reinstalls)
+      - ./data/.ssh:/home/sandbox/.ssh:rw
       - ./data/.npm:/home/sandbox/.npm:rw
 
-    # Read-only root filesystem
+    # Read-only root filesystem prevents unauthorized system changes
     read_only: true
 
-    # Tmpfs for transient data
+    # Tmpfs for transient runtime files
     tmpfs:
       - /tmp
       - /run
-      - /home/sandbox/.cache
+      - /home/sandbox/.local/share  # Chrome crash dumps etc.
+
+    # Increased shared memory prevents browser crashes on heavy sites
+    shm_size: 2gb
 
     restart: unless-stopped
 
     security_opt:
       - no-new-privileges:true
 
-    # Drop all capabilities; add back only if OpenClaw browser automation requires
+    # Drop all capabilities; reliance on --no-sandbox allows this hardening to stay
     cap_drop:
       - ALL
 
-    # Resource limits
     deploy:
       resources:
         limits:
           cpus: "4"
           memory: 8g
 
-    # Group for Chromium sandbox (required for Playwright/Chromium)
     group_add:
       - "1000"
