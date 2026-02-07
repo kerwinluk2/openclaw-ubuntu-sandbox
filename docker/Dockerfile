@@ -14,6 +14,8 @@ RUN apt-get update && \
       # System basics
       ca-certificates curl wget gnupg tzdata locales \
       tini sudo gosu supervisor \
+      # PHP & Utilities (Pre-installed for Agent)
+      php-cli php-curl php-mbstring php-xml php-zip unzip \
       # Desktop & VNC
       xfce4 xfce4-terminal \
       x11vnc xvfb \
