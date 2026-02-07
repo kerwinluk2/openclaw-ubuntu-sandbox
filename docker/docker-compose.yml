@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  openclaw-sandbox:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: openclaw-sandbox
+
+    # Image already defaults to 'sandbox', but we pin UID/GID for clarity.
+    user: "1000:1000"
+
+    ports:
+      - "8080:8080"  # noVNC
+
+    environment:
+      - TZ=Etc/UTC
+      # Put secrets in .env, not directly in this file.
+
+    volumes:
+      # Only this directory is writable by default.
+      - ./data:/opt/openclaw/data:rw
+
+    # Make the root filesystem read-only to reduce persistence.
+    read_only: true
+
+    # Tmpfs mounts for transient data.
+    tmpfs:
+      - /tmp
+      - /run
+
+    restart: unless-stopped
+
+    security_opt:
+      - no-new-privileges:true
+      # Enable a custom seccomp profile after you tailor it:
+      # - seccomp:./hardening/seccomp-profile.json
+
+    # Drop all capabilities; add back only if OpenClaw strictly requires some.
+    cap_drop:
+      - ALL
+
+    # Optional resource limits; adjust to your host.
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4g
+
+    # Uncomment and tune if you want an isolated internal network.
+    # networks:
+    #   - sandbox_net
+
+# networks:
+#   sandbox_net:
+#     driver: bridge
+#     internal: true
