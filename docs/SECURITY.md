@@ -1,65 +1,55 @@
 # SECURITY
 
-This document describes the main hardening measures used by the sandbox and how
-they affect the threat model.
+Security hardening for the OpenClaw Ubuntu Sandbox.
 
-## Threat model
+## Threat Model
 
-The sandbox is designed to:
+This sandbox is designed to:
+- Isolate OpenClaw, browser automation, and AI code tools from the host
+- Prevent privilege escalation if OpenClaw is compromised
+- Limit persistence and lateral movement
 
-- Contain OpenClaw and its tooling inside a non-root desktop session.
-- Reduce the ability of code inside the container to modify the host.
-- Make persistence and lateral movement harder if OpenClaw is compromised.
+## Hardening Measures
 
-It does **not** attempt to withstand a malicious Docker daemon, kernel-level
-exploits, or physical access to the host.
+### Container Security
 
-## Hardening measures
+- **Non-root execution**: All services run as `sandbox` user (UID 1000)
+- **Dropped capabilities**: `cap_drop: ["ALL"]` - no special privileges
+- **No new privileges**: `no-new-privileges:true` prevents setuid escalation
+- **Read-only root**: Root filesystem mounted read-only
+- **Limited writable paths**: Only `/home/sandbox/.openclaw/workspace` and tmpfs mounts are writable
 
-- **Non-root user**: The desktop and OpenClaw run as the `sandbox` user, not as
-  root inside the container.
-- **Dropped capabilities**: All Linux capabilities are dropped via
-  `cap_drop: ["ALL"]`. Add back capabilities only if strictly required.
-- **No new privileges**: `no-new-privileges` is enabled to prevent privilege
-  escalation via `setuid` binaries or similar mechanisms.
-- **Read-only root filesystem**: The container root filesystem is mounted as
-  read-only (`read_only: true`), with only specific writable paths (tmpfs and
-  the `data` volume).
-- **Limited writable storage**: Only `./data` on the host is writable inside the
-  container (`/opt/openclaw/data`). This reduces the impact of arbitrary file
-  writes.
-- **Resource limits**: Optional CPU and memory limits are configured to avoid
-  the sandbox consuming the entire host.
+### Resource Controls
 
-## Seccomp profile
+- CPU limit: 4 cores
+- Memory limit: 8GB
+- Restart policy: unless-stopped
 
-Docker applies its default seccomp profile by default, which already blocks
-many high-risk syscalls.
+### Browser/Chromium Security
 
-You can add a custom profile by:
+Playwright runs Chromium in sandbox mode. The container requires:
+- User namespace support on the host Docker daemon
+- Proper seccomp profile (Docker default is applied)
 
-1. Creating `hardening/seccomp-profile.json` based on the default Docker
-   seccomp profile.
-2. Uncommenting the `seccomp:./hardening/seccomp-profile.json` line in
-   `docker/docker-compose.yml`.
+If you encounter Chromium sandbox issues, you can add the host's Chrome sandbox:
+```bash
+# Add to docker-compose.yml security_opt:
+- seccomp:unconfined  # Only if necessary, reduces security
+```
 
-Be prepared to iterate on this profile, as a too-strict configuration will
-prevent OpenClaw from starting.
+## Network Security
 
-## Network isolation
+- Port 8080: noVNC web UI (requires browser access)
+- Ports 18789/18790: OpenClaw API/WebSocket
 
-By default the sandbox binds only port 8080 to the host. You can further
-restrict network access by:
+Consider placing behind a reverse proxy with TLS for production use.
 
-- Using an internal Docker network and exposing the sandbox only via a reverse
-  proxy.
-- Applying host-level firewall rules to limit which clients can reach port
-  8080.
+## Updating
 
-## Updating the sandbox
-
-When updating OpenClaw or the base image:
-
-- Rebuild with `docker compose build` to incorporate security updates.
-- Periodically review `docs/SECURITY.md` and your Docker configuration against
-  current best practices.
+Regularly rebuild to get security updates:
+```bash
+docker compose down
+docker compose pull
+docker compose build --no-cache
+docker compose up -d
+```

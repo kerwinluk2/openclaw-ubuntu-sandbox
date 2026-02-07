@@ -1,55 +1,73 @@
 # INSTALL
 
-This document describes how to build and run the hardened Ubuntu desktop sandbox
-for OpenClaw.
+Hardened Ubuntu desktop sandbox with OpenClaw, OpenCode AI, and browser automation.
 
 ## Prerequisites
 
-- A modern Linux host with Docker Engine and Docker Compose plugin installed.
-- Ports and firewall rules allowing access to TCP port 8080 from your client.
+- Docker Engine 20.10+ with Docker Compose plugin
+- Linux host with at least 8GB RAM and 4 CPU cores recommended
 
-## Quick start
+## Quick Start
 
-1. Clone this repository:
+```bash
+# Clone the repository
+git clone https://github.com/kerwinluk2/openclaw-ubuntu-sandbox.git
+cd openclaw-ubuntu-sandbox/docker
 
-   ```bash
-   git clone https://github.com/kerwinluk2/openclaw-ubuntu-sandbox.git
-   cd openclaw-ubuntu-sandbox/docker
-   ```
+# Build the image
+docker compose build
 
-2. Build the image:
+# Start the sandbox
+docker compose up -d
 
-   ```bash
-   docker compose build
-   ```
+# Access the desktop via noVNC
+# Open: http://localhost:8080
 
-3. Start the sandbox in the background:
+# View logs
+docker compose logs -f
+```
 
-   ```bash
-   docker compose up -d
-   ```
+## What’s Included
 
-4. From your browser, open:
+- **Desktop Environment**: XFCE accessible via noVNC on port 8080
+- **OpenClaw** (v2026.2.3): AI automation platform running on ports 18789/18790
+- **OpenCode AI**: Code development assistant
+- **Browser Automation**: Playwright with Chromium for web control
+- **Development Tools**: Node.js 22, Python 3, Git, jq
 
-   - `http://<host-ip>:8080` to access the XFCE desktop via noVNC.
+## Using OpenClaw
 
-5. To stop the sandbox:
+Once the container is running:
 
-   ```bash
-   docker compose down
-   ```
+1. Open `http://localhost:8080` to access the desktop via noVNC
+2. OpenClaw runs automatically - it can control the browser and perform tasks
+3. OpenCode AI runs in the background for code assistance
 
-## Integrating OpenClaw
+### Install Additional Plugins
 
-By default the container expects an executable `start-openclaw.sh` in
-`/opt/openclaw` (inside the container) that starts OpenClaw or any related
-services.
+Enter the container and install plugins:
 
-A typical workflow is:
+```bash
+docker exec -it openclaw-sandbox bash
+openclaw plugins install <plugin-name>
+```
 
-1. Place your OpenClaw files in the `data/` directory on the host.
-2. Add or adjust `start-openclaw.sh` to launch OpenClaw from `/opt/openclaw/data`.
-3. Rebuild the image or mount additional volumes as needed.
+Popular plugins from the reference repo:
+- `@m1heng-clawd/feishu` - Feishu integration
+- `openclaw-plugin-wecom` - WeChat Work integration
 
-The sandbox is designed so that only `./data` on the host becomes writable
-storage in the container.
+## Security
+
+- Runs as non-root `sandbox` user (UID 1000)
+- Read-only root filesystem with limited writable paths
+- All Linux capabilities dropped
+- `no-new-privileges` enabled
+- Resource limits: 4 CPUs, 8GB RAM
+
+## Workspace Persistence
+
+Your OpenClaw workspace and projects are stored in `./data/` on the host:
+
+- `./data/` → `/home/sandbox/.openclaw/workspace`
+- `./data/.gitconfig` → Git configuration
+- `./data/.npm` → npm cache
