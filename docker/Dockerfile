@@ -15,7 +15,8 @@ RUN apt-get update && \
       ca-certificates curl wget gnupg tzdata locales \
       tini sudo gosu supervisor \
       # PHP & Utilities (Pre-installed for Agent)
-      php-cli php-curl php-mbstring php-xml php-zip unzip \
+      # Added extensions for Laravel support: bcmath, mysql, sqlite3
+      php-cli php-curl php-mbstring php-xml php-zip php-bcmath php-mysql php-sqlite3 unzip \
       # Desktop & VNC
       xfce4 xfce4-terminal \
       x11vnc xvfb \
@@ -38,6 +39,8 @@ RUN apt-get update && \
     # Install Node.js
     && curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION} | bash - \
     && apt-get install -y --no-install-recommends nodejs \
+    # Install Composer globally for Laravel
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
