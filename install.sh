@@ -160,3 +160,12 @@ echo
 echo "To stop:    cd \"$INSTALL_DIR/docker\" && $COMPOSE_CMD down"
 echo "To start:   cd \"$INSTALL_DIR/docker\" && $COMPOSE_CMD up -d"
 echo
+echo "-------------------------------------------------------"
+echo "⚠️  SECURITY NOTICE: DIRECT ACCESS IS BLOCKED BY DEFAULT"
+echo "To access this from your local computer, run this command in a NEW terminal on your PC:"
+echo ""
+echo "   ssh -L 8080:127.0.0.1:8080 root@\$(curl -s ifconfig.me || echo \"<YOUR_VPS_IP>\")"
+echo ""
+echo "Then open http://localhost:8080 in your browser."
+echo "-------------------------------------------------------"
+echo
