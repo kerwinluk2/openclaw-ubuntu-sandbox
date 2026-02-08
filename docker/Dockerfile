@@ -31,6 +31,8 @@ RUN apt-get update && \
       fonts-liberation \
       fonts-noto-cjk \
       fonts-noto-color-emoji \
+      # REQUIRED SHARED LIBRARIES (Fixes Exit 127)
+      libgbm1 libasound2 libnss3 libxss1 libatk-bridge2.0-0 libgtk-3-0 \
       # Dev tools
       less vim-tiny procps \
       build-essential \
