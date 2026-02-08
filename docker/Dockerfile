@@ -50,6 +50,14 @@ RUN npm install -g npm@latest
 # Install OpenClaw and OpenCode AI globally
 RUN npm install -g openclaw@2026.2.3 opencode-ai@latest
 
+# Create non-root user with proper home directory (Moved UP)
+# MUST happen before we try to chown files to 'sandbox'
+RUN useradd -m -s /bin/bash sandbox && \
+    mkdir -p /home/sandbox/.openclaw/workspace && \
+    chown -R sandbox:sandbox /home/sandbox && \
+    echo "sandbox ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-sandbox && \
+    chmod 440 /etc/sudoers.d/90-sandbox
+
 # Install AIClient-2-API
 WORKDIR /opt
 RUN git clone https://github.com/justlovemaki/AIClient-2-API.git aiclient \
@@ -65,13 +73,6 @@ RUN npm install -g playwright-extra puppeteer-extra-plugin-stealth
 
 # Install bird (additional utility)
 RUN npm install -g @steipete/bird
-
-# Create non-root user with proper home directory
-RUN useradd -m -s /bin/bash sandbox && \
-    mkdir -p /home/sandbox/.openclaw/workspace && \
-    chown -R sandbox:sandbox /home/sandbox && \
-    echo "sandbox ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-sandbox && \
-    chmod 440 /etc/sudoers.d/90-sandbox
 
 # Create workspace and logs directories
 RUN mkdir -p /opt/novnc /opt/openclaw /var/log/supervisor
