@@ -58,7 +58,8 @@ services:
     # Increased shared memory prevents browser crashes on heavy sites
     shm_size: 2gb
 
-    restart: unless-stopped
+    # "always" ensures the container starts on host boot, even if it was stopped before
+    restart: always
 
     security_opt:
       - no-new-privileges:true
