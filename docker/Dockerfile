@@ -50,8 +50,7 @@ RUN npm install -g npm@latest
 # Install OpenClaw and OpenCode AI globally
 RUN npm install -g openclaw@2026.2.3 opencode-ai@latest
 
-# Create non-root user with proper home directory (Moved UP)
-# MUST happen before we try to chown files to 'sandbox'
+# Create non-root user with proper home directory
 RUN useradd -m -s /bin/bash sandbox && \
     mkdir -p /home/sandbox/.openclaw/workspace && \
     chown -R sandbox:sandbox /home/sandbox && \
@@ -86,8 +85,10 @@ RUN chmod +x /entrypoint.sh
 # Expose ports: 8080 (noVNC), 18789/18790 (OpenClaw), 3000 (AIClient)
 EXPOSE 8080 18789 18790 3000
 
-# Switch to non-root user for runtime
-USER sandbox
+# NOTE: We run supervisord as root, but all application programs
+# (xvfb, x11vnc, novnc, openclaw, opencode, aiclient) run as the
+# non-root 'sandbox' user via the 'user=' setting in supervisord.conf.
+# This allows proper privilege dropping while keeping logging working.
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

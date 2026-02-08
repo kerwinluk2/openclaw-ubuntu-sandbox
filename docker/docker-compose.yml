@@ -7,8 +7,8 @@ services:
       dockerfile: docker/Dockerfile
     container_name: openclaw-sandbox
 
-    # Non-root user (sandbox uid:gid = 1000:1000)
-    user: "1000:1000"
+    # Run container as root; supervisord will drop privileges for each program
+    # to the non-root 'sandbox' user as configured in supervisord.conf.
 
     ports:
       # Bind to localhost (127.0.0.1) ONLY for security
@@ -74,9 +74,6 @@ services:
         limits:
           cpus: "4"
           memory: 8g
-
-    group_add:
-      - "1000"
 
 volumes:
   openclaw_extensions:
