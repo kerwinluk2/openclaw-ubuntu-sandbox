@@ -19,7 +19,7 @@ irm https://raw.githubusercontent.com/kerwinluk2/openclaw-ubuntu-sandbox/main/in
 *Note: Since this is a private repository, you may need to clone it first and run `install.ps1` locally if the command above fails.*
 
 This will:
-1.  Clone (or update) this repository.
+1.  Clone (or update) this repository to `$HOME/openclaw-sandbox`.
 2.  Build the hardened Docker image.
 3.  Start the sandbox.
 
@@ -45,8 +45,9 @@ This will:
 If you prefer to run it manually without the helper scripts:
 
 ```bash
-git clone https://github.com/kerwinluk2/openclaw-ubuntu-sandbox.git
-cd openclaw-ubuntu-sandbox/docker
+# Clone into 'openclaw-sandbox' to match the automated installer
+git clone https://github.com/kerwinluk2/openclaw-ubuntu-sandbox.git ~/openclaw-sandbox
+cd ~/openclaw-sandbox/docker
 
 # Build the image
 docker compose build
@@ -63,7 +64,7 @@ docker compose up -d
 
 ## 🔌 Access & Ports
 
-Services are bound to **127.0.0.1** for security. You cannot access them from other devices on your network unless you modify `docker-compose.yml`.
+Services are bound to **127.0.0.1** for security. You cannot access them from other devices on your network unless you modify `docker-compose.yml` or use an SSH tunnel.
 
 | Port | Service | URL | Description |
 | :--- | :--- | :--- | :--- |
@@ -71,6 +72,13 @@ Services are bound to **127.0.0.1** for security. You cannot access them from ot
 | **3000** | AIClient | `http://localhost:3000` | AI Client Gateway / UI |
 | **18789** | OpenClaw API | `http://localhost:18789` | Main Automation Gateway |
 | **18790** | OpenClaw WS | `http://localhost:18790` | WebSocket / Dashboard |
+
+### 🔒 Secure Access (Recommended)
+To access the sandbox securely from your local machine, run this SSH tunnel command in a separate terminal:
+```bash
+ssh -L 8080:127.0.0.1:8080 root@<YOUR_VPS_IP>
+```
+Then open `http://localhost:8080` in your browser.
 
 ## 🛡️ Security Note
 
