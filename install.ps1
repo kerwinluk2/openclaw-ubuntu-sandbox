@@ -1,11 +1,3 @@
-#
-# OpenClaw Ubuntu Sandbox - Windows PowerShell Installer
-# One-line setup for OpenClaw Desktop Sandbox on Docker for Windows
-#
-# Usage:
-#   irm https://raw.githubusercontent.com/kerwinluk2/openclaw-ubuntu-sandbox/main/install.ps1 | iex
-#
-
 param(
     [string]$InstallDir = "$env:USERPROFILE\openclaw-sandbox"
 )
@@ -45,10 +37,16 @@ if (docker compose version 2>$null) {
     exit 1
 }
 
-try {
-    docker info 2>$null | Out-Null
+# Fix: Use lax error preference for checking docker info to ignore stderr warnings
+$OldEAP = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+docker info 2>&1 | Out-Null
+$IsDockerRunning = $LASTEXITCODE -eq 0
+$ErrorActionPreference = $OldEAP
+
+if ($IsDockerRunning) {
     Write-Ok "Docker is running"
-} catch {
+} else {
     Write-Fail "Docker is not running"
     Write-Host "Start Docker Desktop and try again." -ForegroundColor Red
     exit 1
