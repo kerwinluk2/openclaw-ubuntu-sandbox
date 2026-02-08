@@ -5,7 +5,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoUrl   = "https://github.com/kerwinluk2/openclaw-ubuntu-sandbox.git"
-$ComposeCmd = ""
+$ComposeExe = ""
+$ComposeArgs = @()
 
 function Write-Step($msg)    { Write-Host "`n▶ $msg" -ForegroundColor Blue }
 function Write-Ok($msg)      { Write-Host "✓ $msg"  -ForegroundColor Green }
@@ -28,10 +29,11 @@ Write-Ok "docker found"
 
 if (docker compose version 2>$null) {
     Write-Ok "Docker Compose plugin found"
-    $ComposeCmd = "docker compose"
+    $ComposeExe = "docker"
+    $ComposeArgs = @("compose")
 } elseif (Test-Command docker-compose) {
     Write-Ok "docker-compose (standalone) found"
-    $ComposeCmd = "docker-compose"
+    $ComposeExe = "docker-compose"
 } else {
     Write-Fail "Docker Compose not found"
     exit 1
@@ -74,18 +76,20 @@ if (Test-Path ".git") {
 # Build and start
 Write-Step "Building Docker image (first time may take a while)..."
 Set-Location "$InstallDir\docker"
-& $ComposeCmd build
+& $ComposeExe $ComposeArgs build
 
 Write-Step "Starting openclaw-sandbox container..."
-& $ComposeCmd up -d
+& $ComposeExe $ComposeArgs up -d
 
 Write-Ok "Sandbox is running!"
+
+$PrintCompose = "$ComposeExe $ComposeArgs"
 
 Write-Host ""
 Write-Host "Desktop (noVNC):   http://localhost:8080" -ForegroundColor Cyan
 Write-Host "OpenClaw ports:    18789, 18790 (inside container)" -ForegroundColor Cyan
 Write-Host "Install directory: $InstallDir" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Stop:    cd `"$InstallDir\docker`" && $ComposeCmd down" -ForegroundColor White
-Write-Host "Start:   cd `"$InstallDir\docker`" && $ComposeCmd up -d" -ForegroundColor White
+Write-Host "Stop:    cd `"$InstallDir\docker`" && $PrintCompose down" -ForegroundColor White
+Write-Host "Start:   cd `"$InstallDir\docker`" && $PrintCompose up -d" -ForegroundColor White
 Write-Host ""
