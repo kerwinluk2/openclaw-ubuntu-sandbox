@@ -49,11 +49,12 @@ services:
     # Read-only root filesystem prevents unauthorized system changes
     read_only: true
 
-    # Tmpfs for transient runtime files
+    # Tmpfs for transient runtime files (writable even with read_only root)
     tmpfs:
       - /tmp
       - /run
       - /home/sandbox/.local/share  # Chrome crash dumps etc.
+      - /var/log/supervisor         # Supervisor logs (fixes read-only FS error)
 
     # Increased shared memory prevents browser crashes on heavy sites
     shm_size: 2gb
