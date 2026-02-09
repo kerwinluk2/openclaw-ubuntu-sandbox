@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
-    NODE_VERSION=22.x
+    NODE_VERSION=22.x \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 # Install base system, Node.js, desktop environment, and dependencies
 RUN apt-get update && \
@@ -66,8 +67,8 @@ RUN git clone https://github.com/justlovemaki/AIClient-2-API.git aiclient \
     && npm install \
     && chown -R sandbox:sandbox /opt/aiclient
 
-# Install Playwright and Chromium for browser automation
-RUN npm install -g playwright && npx playwright install chromium
+# Install Playwright for browser automation
+RUN npm install -g playwright
 
 # Install playwright-extra and stealth plugins
 RUN npm install -g playwright-extra puppeteer-extra-plugin-stealth

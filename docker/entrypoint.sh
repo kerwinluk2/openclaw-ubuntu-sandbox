@@ -6,7 +6,7 @@ fix_perms() {
     local dir="$1"
     # Only try to chown if directory exists
     if [ -d "$dir" ]; then
-        sudo chown -R sandbox:sandbox "$dir" || true
+        chown -R sandbox:sandbox "$dir" || true
     fi
 }
 
@@ -19,10 +19,11 @@ if id sandbox >/dev/null 2>&1; then
     fix_perms "/home/sandbox/.config"
     fix_perms "/home/sandbox/.cache"
     fix_perms "/home/sandbox/.ssh"
+    fix_perms "/var/log/supervisor"
 fi
 
 # Set up Playwright
-export PLAYWRIGHT_BROWSERS_PATH=0
+export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 # Execute the main process (supervisord by default)
 exec "$@"
