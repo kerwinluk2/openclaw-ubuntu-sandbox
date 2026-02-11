@@ -6,21 +6,60 @@ Designed for developers and automation engineers who need a safe, isolated envir
 
 ## 🚀 Quick Start
 
-### 1. Install on your VPS
+### Windows PC (One-Click Install)
+
+Run this command in **PowerShell**:
+
+```powershell
+irm https://raw.githubusercontent.com/kerwinluk2/openclaw-ubuntu-sandbox/main/install.ps1 | iex
+```
+
+**Requirements:**
+- Docker Desktop installed and running ([Download here](https://docs.docker.com/desktop/install/windows-install/))
+- Git installed (optional - only for cloning)
+
+The script will automatically:
+- Check prerequisites (Docker, Git)
+- Clone or update the repository
+- Build the Docker image
+- Start the sandbox container
+
+Once running, access the desktop at: **http://localhost:8080**
+
+**Stop/Start commands:**
+```powershell
+# Navigate to the installation directory
+cd ~\openclaw-sandbox\docker
+
+# Stop the container
+docker compose down
+
+# Start the container
+docker compose up -d
+```
+
+---
+
+### Linux / VPS
+
 Run this command on your Ubuntu server:
+
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/kerwinluk2/openclaw-ubuntu-sandbox/main/install.sh)
 ```
+
 *(This installs to `~/openclaw-sandbox` and starts the container)*
 
-### 2. Connect from your Local Computer
+#### Connect from your Local Computer
+
 The sandbox is locked down for security and blocks external connections by default. To access the desktop, run this secure tunnel command in a terminal on your **local computer**:
 
 ```bash
 ssh -L 8080:127.0.0.1:8080 root@<YOUR_VPS_IP>
 ```
 
-### 3. Open the Desktop
+#### Open the Desktop
+
 Open your browser and visit: **http://localhost:8080**
 
 ---
@@ -66,7 +105,6 @@ Services are bound to **127.0.0.1** for security.
 | Port | Service | URL | Description |
 | :--- | :--- | :--- | :--- |
 | **8080** | noVNC | `http://localhost:8080` | Web-based Desktop Access |
-| **3000** | AIClient | `http://localhost:3000` | AI Client Gateway / UI |
 | **18789** | OpenClaw API | `http://localhost:18789` | Main Automation Gateway |
 | **18790** | OpenClaw WS | `http://localhost:18790` | WebSocket / Dashboard |
 
