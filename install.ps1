@@ -62,7 +62,15 @@ Write-Ok "Directory ready"
 # Clone or update repo
 if (Test-Path ".git") {
     Write-Ok "Existing repo found, updating..."
-    git pull --ff-only 2>$null | Out-Null
+    # Fix: Use lax error preference for git pull to ignore stderr output
+    $OldEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    git pull --ff-only 2>&1 | Out-Null
+    $GitExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $OldEAP
+    if ($GitExitCode -ne 0) {
+        Write-Warn "Git pull completed with warnings or already up to date"
+    }
 } else {
     if (-not (Test-Command git)) {
         Write-Fail "git not found"
